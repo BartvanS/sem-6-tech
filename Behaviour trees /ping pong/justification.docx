@@ -1,0 +1,12 @@
+﻿Een eis van het project is dat wij werken met behaviour trees. Dit is een nieuw concept voor mij. Om te oefenen met behaviour trees heb ik de opdracht “pingpongpong” gemaakt.  
+
+Om de opdracht te kunnen maken heb ik eerst moeten onderzoeken wat behaviour trees zijn. Eerst heb ik de documentatie van https://behaviortree.github.io/BehaviorTree.CPP/ door gelezen. Deze bron hielp mij met het begrijpen van het concept.  
+
+Vervolgens heb ik met het programma draw.io een BT ontwerp gemaakt is. 
+
+Aangezien bij ons project wij gebruik maken van python, maken we gebruik van de python behaviortree library: py_trees. Hier heb ik met de documentatie en voorbeelden de code mee gemaakt. https://py-trees.readthedocs.io/en/devel/   
+
+Om het resultaat te valideren heb ik feedback gevraagd van klasgenoten en een leraar. Uiteindelijk heb ik hierdoor beter begrip gekregen voor behavior trees. De geleverde producten zijn: 
+
+    • Drawio BT ontwerp 
+    • Code  
