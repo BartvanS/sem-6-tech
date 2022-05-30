@@ -1,0 +1,150 @@
+<?xml version="1.0"?>
+<root main_tree_to_execute="IC">
+    <!-- ////////// -->
+    <BehaviorTree ID="ChangeGreen">
+        <Sequence>
+            <ReactiveFallback>
+                <Condition ID="AllRed2Sec"/>
+                <Timeout msec="3000">
+                    <Action ID="SetLight" color="red" name="" orientation_lantern="n"/>
+                </Timeout>
+            </ReactiveFallback>
+            <Action ID="SetLight" color="green" name="" orientation_lantern="n"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="ChangeRed">
+        <Sequence>
+            <Action ID="SetLight" color="orange" name="orange" orientation_lantern="n"/>
+            <Action ID="WaitTime" time="1000"/>
+            <Action ID="SetLight" color="red" name="orange" orientation_lantern="n"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="FlashOrange">
+        <Sequence>
+            <Action ID="SetLight" color="orange" name="" orientation_lantern="n"/>
+            <Action ID="WaitTime" time="500"/>
+            <Action ID="SetLight" color="black" name="" orientation_lantern="nesw"/>
+            <Action ID="WaitTime" time="500"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="IC">
+        <Fallback>
+            <BlackboardCheckString return_on_mismatch="FAILURE" value_A="regular" value_B="{operation_mode}">
+                <SubTree ID="RegularICMode"/>
+            </BlackboardCheckString>
+            <SubTree ID="IrregularICMode" __shared_blackboard="false"/>
+        </Fallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="IrregularICMode">
+        <Sequence name="">
+            <Fallback>
+                <Condition ID="AllRed"/>
+                <SubTree ID="ChangeRed" __shared_blackboard="false" orientation="ns"/>
+            </Fallback>
+            <SubTree ID="FlashOrange" __shared_blackboard="false"/>
+            <Fallback>
+                <Inverter>
+                    <Condition ID="SensorsEnabled"/>
+                </Inverter>
+                <Action ID="DisableSensors"/>
+            </Fallback>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="RegularICMode">
+        <Sequence>
+            <Fallback>
+                <Condition ID="SensorsEnabled"/>
+                <Sequence>
+                    <Action ID="SetLight" color="red" orientation_lantern="n"/>
+                    <Action ID="EnableSensors"/>
+                </Sequence>
+            </Fallback>
+            <ForceSuccess>
+                <SubTree ID="Road" __shared_blackboard="false" orientation="ns"/>
+            </ForceSuccess>
+            <ForceSuccess>
+                <SubTree ID="Road" __shared_blackboard="false" orientation="ns"/>
+            </ForceSuccess>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="Road">
+        <Sequence name="">
+            <Fallback>
+                <Condition ID="CarDetected"/>
+                <ForceFailure>
+                    <Fallback>
+                        <Action ID="SetLight" color="red" orientation_lantern="n"/>
+                        <SubTree ID="ChangeRed" __shared_blackboard="false" orientation="ns"/>
+                    </Fallback>
+                </ForceFailure>
+            </Fallback>
+            <SubTree ID="ChangeGreen" __shared_blackboard="false" orientation="ns"/>
+            <Action ID="WaitTime" time="5000"/>
+            <Sequence name="">
+                <ForceSuccess>
+                    <ReactiveFallback name="">
+                        <Inverter name="">
+                            <Condition ID="CarDetected"/>
+                        </Inverter>
+                        <Timeout msec="55000" name="">
+                            <Action ID="AlwaysRunning"/>
+                        </Timeout>
+                    </ReactiveFallback>
+                </ForceSuccess>
+                <SubTree ID="ChangeRed" __shared_blackboard="false" orientation="ns"/>
+            </Sequence>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Condition ID="AllRed"/>
+        <Condition ID="AllRed2Sec"/>
+        <Action ID="AlwaysRunning"/>
+        <Condition ID="CarDetected"/>
+        <SubTree ID="ChangeGreen">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+            <input_port default="ns" name="orientation"/>
+        </SubTree>
+        <SubTree ID="ChangeRed">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+            <input_port default="ns" name="orientation"/>
+        </SubTree>
+        <Action ID="DisableSensors"/>
+        <Action ID="EnableSensors"/>
+        <Action ID="FlashLightsOrange"/>
+        <SubTree ID="FlashOrange">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <SubTree ID="IC">
+            <input_port default="regular" name="operation_mode">operation mode of the IC</input_port>
+        </SubTree>
+        <SubTree ID="IrregularICMode">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
+        <Condition ID="IsRed"/>
+        <Condition ID="NoCarDetected"/>
+        <SubTree ID="RegularICMode"/>
+        <SubTree ID="Road">
+            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+            <input_port default="ns" name="orientation">road directed towards north/south or east/west</input_port>
+        </SubTree>
+        <Condition ID="SensorsEnabled"/>
+        <Action ID="SetLight">
+            <input_port default="red" name="color"/>
+            <input_port default="n" name="orientation_lantern">which side of the road e.g. west north</input_port>
+        </Action>
+        <Condition ID="TurnGreen"/>
+        <Condition ID="TurnRed"/>
+        <Action ID="WaitTime">
+            <input_port default="1000" name="time">Time it needs to wait before returning success</input_port>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
+
