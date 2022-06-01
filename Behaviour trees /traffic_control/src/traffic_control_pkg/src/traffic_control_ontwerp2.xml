@@ -6,46 +6,45 @@
             <ReactiveFallback>
                 <Condition ID="AllRed2Sec"/>
                 <Timeout msec="3000">
-                    <Action ID="SetLight" color="red" name="" orientation_lantern="n"/>
+                    <Action ID="SetLight" color="red" name=""/>
                 </Timeout>
             </ReactiveFallback>
-            <Action ID="SetLight" color="green" name="" orientation_lantern="n"/>
+            <Action ID="SetLight" color="green" name=""/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="ChangeRed">
         <Sequence>
-            <Action ID="SetLight" color="orange" name="orange" orientation_lantern="n"/>
+            <Action ID="SetLight" color="orange" name="orange"/>
             <Action ID="WaitTime" time="1000"/>
-            <Action ID="SetLight" color="red" name="orange" orientation_lantern="n"/>
+            <Action ID="SetLight" color="red" name="orange"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="FlashOrange">
         <Sequence>
-            <Action ID="SetLight" color="orange" name="" orientation_lantern="n"/>
+            <Action ID="SetLight" color="orange" name=""/>
             <Action ID="WaitTime" time="500"/>
-            <Action ID="SetLight" color="black" name="" orientation_lantern="nesw"/>
+            <Action ID="SetLight" color="black" name=""/>
             <Action ID="WaitTime" time="500"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="IC">
         <Fallback>
-            <BlackboardCheckString return_on_mismatch="FAILURE" value_A="regular" value_B="{operation_mode}">
-                <SubTree ID="RegularICMode"/>
-            </BlackboardCheckString>
-            <SubTree ID="IrregularICMode" __shared_blackboard="false"/>
+            <SubTree ID="RegularICMode" __shared_blackboard="true"/>
+            <SubTree ID="IrregularICMode" __shared_blackboard="true"/>
         </Fallback>
     </BehaviorTree>
     <!-- ////////// -->
     <BehaviorTree ID="IrregularICMode">
         <Sequence name="">
+            <SubTree ID="SelectAllLanterns" __shared_blackboard="true" name=""/>
             <Fallback>
                 <Condition ID="AllRed"/>
-                <SubTree ID="ChangeRed" __shared_blackboard="false" orientation="ns"/>
+                <SubTree ID="ChangeRed" __shared_blackboard="true"/>
             </Fallback>
-            <SubTree ID="FlashOrange" __shared_blackboard="false"/>
+            <SubTree ID="FlashOrange" __shared_blackboard="true"/>
             <Fallback>
                 <Inverter>
                     <Condition ID="SensorsEnabled"/>
@@ -60,15 +59,16 @@
             <Fallback>
                 <Condition ID="SensorsEnabled"/>
                 <Sequence>
-                    <Action ID="SetLight" color="red" orientation_lantern="n"/>
+                    <SubTree ID="SelectAllLanterns" __shared_blackboard="true"/>
+                    <Action ID="SetLight" color="red"/>
                     <Action ID="EnableSensors"/>
                 </Sequence>
             </Fallback>
             <ForceSuccess>
-                <SubTree ID="Road" __shared_blackboard="false" orientation="ns"/>
+                <SubTree ID="Road" __shared_blackboard="false" east="false" north="true" south="true" west="false"/>
             </ForceSuccess>
             <ForceSuccess>
-                <SubTree ID="Road" __shared_blackboard="false" orientation="ew"/>
+                <SubTree ID="Road" __shared_blackboard="false" east="false" north="true" south="true" west="false"/>
             </ForceSuccess>
         </Sequence>
     </BehaviorTree>
@@ -79,12 +79,12 @@
                 <Condition ID="CarDetected"/>
                 <ForceFailure>
                     <Fallback>
-                        <Action ID="SetLight" color="red" orientation_lantern="n"/>
-                        <SubTree ID="ChangeRed" __shared_blackboard="false" orientation="ns"/>
+                        <Condition ID="AllRed" name=""/>
+                        <SubTree ID="ChangeRed" __shared_blackboard="true"/>
                     </Fallback>
                 </ForceFailure>
             </Fallback>
-            <SubTree ID="ChangeGreen" __shared_blackboard="false" orientation="ns"/>
+            <SubTree ID="ChangeGreen" __shared_blackboard="true"/>
             <Action ID="WaitTime" time="5000"/>
             <Sequence name="">
                 <ForceSuccess>
@@ -97,8 +97,17 @@
                         </Timeout>
                     </ReactiveFallback>
                 </ForceSuccess>
-                <SubTree ID="ChangeRed" __shared_blackboard="false" orientation="ns"/>
+                <SubTree ID="ChangeRed" __shared_blackboard="true"/>
             </Sequence>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="SelectAllLanterns">
+        <Sequence name="">
+            <SetBlackboard output_key="north" value="true"/>
+            <SetBlackboard output_key="east" value="true"/>
+            <SetBlackboard output_key="south" value="true"/>
+            <SetBlackboard output_key="west" value="true"/>
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
@@ -108,39 +117,40 @@
         <Action ID="AlwaysRunning"/>
         <Condition ID="CarDetected"/>
         <SubTree ID="ChangeGreen">
-            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
-            <input_port default="ns" name="orientation"/>
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
         <SubTree ID="ChangeRed">
-            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
-            <input_port default="ns" name="orientation"/>
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
         <Action ID="DisableSensors"/>
         <Action ID="EnableSensors"/>
-        <Action ID="FlashLightsOrange"/>
         <SubTree ID="FlashOrange">
-            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
         <SubTree ID="IC">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
             <input_port default="regular" name="operation_mode">operation mode of the IC</input_port>
         </SubTree>
         <SubTree ID="IrregularICMode">
-            <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
-        <Condition ID="IsRed"/>
-        <Condition ID="NoCarDetected"/>
-        <SubTree ID="RegularICMode"/>
+        <SubTree ID="RegularICMode">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
+        </SubTree>
         <SubTree ID="Road">
             <input_port default="false" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
-            <input_port default="ns" name="orientation">road directed towards north/south or east/west</input_port>
+            <inout_port default="false" name="east"/>
+            <inout_port default="true" name="north">lantern directoin</inout_port>
+            <inout_port default="true" name="south"/>
+            <inout_port default="false" name="west"/>
+        </SubTree>
+        <SubTree ID="SelectAllLanterns">
+            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
         <Condition ID="SensorsEnabled"/>
         <Action ID="SetLight">
             <input_port default="red" name="color"/>
-            <input_port default="n" name="orientation_lantern">which side of the road e.g. west north</input_port>
         </Action>
-        <Condition ID="TurnGreen"/>
-        <Condition ID="TurnRed"/>
         <Action ID="WaitTime">
             <input_port default="1000" name="time">Time it needs to wait before returning success</input_port>
         </Action>

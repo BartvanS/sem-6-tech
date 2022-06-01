@@ -3,7 +3,6 @@
 using BT::NodeStatus;
 NodeStatus AllRed2Sec();
 NodeStatus SensorsEnabled();
-NodeStatus DisableSensors();
 NodeStatus AllRed();
 NodeStatus CarDetected();
 

@@ -1,19 +1,34 @@
 #include "nodes.h"
-
+using std::cout; using std::endl;
 using namespace BT;
 SetLight::SetLight(const std::string &name, const NodeConfiguration &config) : SyncActionNode(name, config)
 {
 }
 BT::PortsList SetLight::providedPorts()
 {
-    return {BT::InputPort<std::string>("color"), BT::InputPort<std::string>("orientation_lantern")};
+    return {
+        BT::InputPort<std::string>("color"),
+        BT::InputPort<bool>("north"),
+        BT::InputPort<bool>("east"),
+        BT::InputPort<bool>("south"),
+        BT::InputPort<bool>("west")};
 }
 BT::NodeStatus SetLight::tick()
 {
-    Optional<std::string> orientation = getInput<std::string>("orientation_lantern");
+    Optional<bool> north = getInput<bool>("north");
+    Optional<bool> east = getInput<bool>("east");
+    Optional<bool> south = getInput<bool>("south");
+    Optional<bool> west = getInput<bool>("west");
     Optional<std::string> color = getInput<std::string>("color");
-    std::cout << "Lantern(s) " << orientation->c_str() << "set to color:" << color->c_str() << "\n"
-              << std::endl;
+    if (color.value() == "black")
+    {
+        std::cout << "Lantern(s) " << north.value() << " disabled" << std::endl;
+    }
+    else
+    {
+        std::cout << "Lantern(s) "
+                  << " set to color:" << color.value() << std::endl;
+    }
     return BT::NodeStatus::SUCCESS;
 }
 ///////////////////
@@ -40,37 +55,49 @@ BT::NodeStatus DisableSensors::tick()
 //////////////////////
 #include <ctime>
 WaitTime::WaitTime(const std::string &name, const NodeConfiguration &config)
-    : SyncActionNode(name, config)
+    : CoroActionNode(name, config)
 {
 }
 PortsList WaitTime::providedPorts()
 {
     // This action has a single input port called "message"
     // Any port must have a name. The type is optional.
-    return {InputPort<std::int64_t>("time")};
+    return {InputPort<int64_t>("time")};
 }
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::system_clock;
 BT::NodeStatus WaitTime::tick()
 {
-    Optional<std::int64_t> timeToWait = getInput<std::int64_t>("time");
+    int64_t timeToWait = getInput<int64_t>("time").value();
+    auto currentTimeMs = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
     if (this->nodeStatus == NodeStatus::FAILURE || this->nodeStatus == NodeStatus::SUCCESS)
     {
+        std::cout << "waiting for " << timeToWait << "ms" << std::endl;
         this->nodeStatus = NodeStatus::RUNNING;
-        this->startTime = std::time(NULL);
+        this->startTime  = currentTimeMs;
     }
     else if (this->nodeStatus == NodeStatus::RUNNING)
     {
-        long timedif = (this->startTime - std::time(NULL));
-        if (timedif > timeToWait)
+        long timedif = currentTimeMs - this->startTime;
+        // std::cout << "Time left to wait: " << timeToWait - timedif << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        if (timedif >= timeToWait)
         {
             this->nodeStatus = NodeStatus::SUCCESS;
         }
     }
+    std::cout << this->nodeStatus << std::endl;
     return this->nodeStatus;
 }
 
 ///////
-AlwaysRunning::AlwaysRunning(const std::string &name) : BT::SyncActionNode(name, {})
+AlwaysRunning::AlwaysRunning(const std::string &name, const NodeConfiguration &config) : AsyncActionNode(name, config)
 {
+}
+PortsList AlwaysRunning::providedPorts()
+{
+    return {};
 }
 
 BT::NodeStatus AlwaysRunning::tick()

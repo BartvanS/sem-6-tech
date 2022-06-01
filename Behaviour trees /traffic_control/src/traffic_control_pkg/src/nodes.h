@@ -31,21 +31,23 @@ class DisableSensors : public BT::SyncActionNode
     BT::NodeStatus tick() override;
 };
 
-class WaitTime : public BT::SyncActionNode
+class WaitTime : public BT::CoroActionNode
 {
-  long startTime = 0;
-  NodeStatus nodeStatus = NodeStatus::FAILURE;
+  private: 
+    int64_t startTime = 0;
+    NodeStatus nodeStatus = NodeStatus::FAILURE;
   public:
     WaitTime(const std::string& name, const NodeConfiguration& config);
     static BT::PortsList providedPorts();
     // You must override the virtual function tick()
     BT::NodeStatus tick() override;
 };
-class AlwaysRunning : public BT::SyncActionNode
+class AlwaysRunning : public BT::AsyncActionNode
 {
   public:
-    AlwaysRunning(const std::string& name);
+    AlwaysRunning(const std::string& name,  const NodeConfiguration& config);
     
+    static BT::PortsList providedPorts();
 
     // You must override the virtual function tick()
     BT::NodeStatus tick() override;
