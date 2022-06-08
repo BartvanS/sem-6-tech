@@ -8,32 +8,33 @@ BT::PortsList SetLight::providedPorts()
 {
     return {
         BT::InputPort<std::string>("color"),
-        BT::InputPort<bool>("north"),
-        BT::InputPort<bool>("east"),
-        BT::InputPort<bool>("south"),
-        BT::InputPort<bool>("west")};
+        BT::InputPort<std::string>("north"),
+        BT::InputPort<std::string>("east"),
+        BT::InputPort<std::string>("south"),
+        BT::InputPort<std::string>("west")
+        };
 }
 BT::NodeStatus SetLight::tick()
 {
-    Optional<bool> north = getInput<bool>("north");
-    Optional<bool> east = getInput<bool>("east");
-    Optional<bool> south = getInput<bool>("south");
-    Optional<bool> west = getInput<bool>("west");
+    Optional<std::string> north = getInput<std::string>("north");
+    Optional<std::string> east = getInput<std::string>("east");
+    Optional<std::string> south = getInput<std::string>("south");
+    Optional<std::string> west = getInput<std::string>("west");
     Optional<std::string> color = getInput<std::string>("color");
     if (color.value() == "black")
     {
-        std::cout << "Lantern(s) " << north.value() << " disabled" << std::endl;
+        std::cout << "Lantern(s) " << north.value()  << " disabled" << std::endl;
     }
     else
     {
-        std::cout << "Lantern(s) "
-                  << " set to color:" << color.value() << std::endl;
+        std::cout << "Lantern(s) " << "set to color:" << color.value() << " for " <<north.value() << east.value()<< south.value() << west.value() << std::endl;
     }
     return BT::NodeStatus::SUCCESS;
 }
 ///////////////////
 EnableSensors::EnableSensors(const std::string &name) : BT::SyncActionNode(name, {})
 {
+    
 }
 
 BT::NodeStatus EnableSensors::tick()
@@ -80,14 +81,12 @@ BT::NodeStatus WaitTime::tick()
     else if (this->nodeStatus == NodeStatus::RUNNING)
     {
         long timedif = currentTimeMs - this->startTime;
-        // std::cout << "Time left to wait: " << timeToWait - timedif << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         if (timedif >= timeToWait)
         {
             this->nodeStatus = NodeStatus::SUCCESS;
         }
     }
-    std::cout << this->nodeStatus << std::endl;
     return this->nodeStatus;
 }
 

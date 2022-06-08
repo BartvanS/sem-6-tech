@@ -9,6 +9,7 @@
 using namespace BT;
 int main()
 {
+    std::cout << "wowowowo\n";
     // We use the BehaviorTreeFactory to register our custom nodes
     BehaviorTreeFactory factory;
 
@@ -17,22 +18,18 @@ int main()
     factory.registerNodeType<EnableSensors>("EnableSensors");
     factory.registerNodeType<DisableSensors>("DisableSensors");
     factory.registerNodeType<WaitTime>("WaitTime");
-    factory.registerNodeType<AlwaysRunning>("AlwaysRunning");   
+    factory.registerNodeType<AlwaysRunning>("AlwaysRunning");
     // conditions
     factory.registerSimpleCondition("AllRed2Sec", std::bind(AllRed2Sec));
     factory.registerSimpleCondition("SensorsEnabled", std::bind(SensorsEnabled));
     factory.registerSimpleCondition("AllRed", std::bind(AllRed));
     factory.registerSimpleCondition("CarDetected", std::bind(CarDetected));
-
+    std::cout << "wow";
     auto tree = factory.createTreeFromFile("/home/bart/Desktop/school/eigen/Behaviour trees /traffic_control/src/traffic_control_pkg/src/traffic_control_ontwerp2.xml");
     while (true)
     {
-    tree.tickRoot();
+        tree.tickRoot();
     }
-    
-    // StdCoutLogger logger_cout(tree);
-    // FileLogger logger_file(tree, "bt_trace.fbl");
-        // printTreeRecursively(tree.rootNode());
 
     return 0;
 }

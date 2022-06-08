@@ -2,8 +2,16 @@
 using namespace std;
 NodeStatus AllRed2Sec()
 {
-    cout << "All lights are red for at least 2 seconds" << endl;
-    return NodeStatus::SUCCESS;
+    if (rand() % 2 == 0)
+    {
+        cout << "All lights are red for at least 2 seconds" << endl;
+        return NodeStatus::SUCCESS;
+    }
+    else
+    {
+        std::cout << "Not all lights are red for at least 2 seconds" << std::endl;
+        return NodeStatus::FAILURE;
+    }
 }
 NodeStatus SensorsEnabled()
 {
