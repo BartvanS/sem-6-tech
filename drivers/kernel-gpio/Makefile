@@ -1,4 +1,5 @@
-obj-m += kernel-gpio.o
+file := kernel-gpio
+obj-m += $(file).o
 
 KDIR = /lib/modules/$(shell uname -r)/build
 
@@ -7,3 +8,7 @@ all:
 
 clean:
 	make -C $(KDIR) M=$(shell pwd) clean
+
+install: all
+	-sudo rmmod $(file) 
+	sudo insmod $(file).ko
