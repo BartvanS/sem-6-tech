@@ -38,3 +38,22 @@ NodeStatus CarDetected()
         return NodeStatus::FAILURE;
     }
 }
+
+NodeStatus OperatorModeRegular(){
+    return NodeStatus::FAILURE;
+}
+
+////////////
+OperatorModeSet::OperatorModeSet(const std::string &name) : BT::SyncActionNode(name, {})
+{
+}
+
+BT::NodeStatus OperatorModeSet::tick()
+{
+    if (this->isSet)
+    {
+        this->isSet = true;
+        return NodeStatus::SUCCESS;
+    }
+    return NodeStatus::FAILURE;
+}

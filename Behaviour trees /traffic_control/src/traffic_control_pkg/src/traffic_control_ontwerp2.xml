@@ -6,7 +6,7 @@
             <ReactiveFallback>
                 <Condition ID="AllRed2Sec"/>
                 <Timeout msec="3000">
-                    <Action ID="SetLight" color="red" east="{east_road}" name="" north="{north_road}" south="{south_road}" west="{west_road}"/>
+                    <Action ID="AlwaysRunning"/>
                 </Timeout>
             </ReactiveFallback>
             <Action ID="SetLight" color="green" east="{east_road}" name="" north="{north_road}" south="{south_road}" west="{west_road}"/>
@@ -32,9 +32,15 @@
     <!-- ////////// -->
     <BehaviorTree ID="IC">
         <Fallback>
-            <BlackboardCheckString return_on_mismatch="FAILURE" value_A="regular" value_B="regular">
-                <SubTree ID="RegularICMode" __shared_blackboard="true"/>
-            </BlackboardCheckString>
+            <Sequence>
+                <Fallback name="">
+                    <Action ID="OperatorModeSet" name="Condition is mode set"/>
+                    <SetBlackboard name="" output_key="operator_mode" value="regular"/>
+                </Fallback>
+                <BlackboardCheckString return_on_mismatch="FAILURE" value_A="regular" value_B="{operator_mode}">
+                    <SubTree ID="RegularICMode" __shared_blackboard="true"/>
+                </BlackboardCheckString>
+            </Sequence>
             <SubTree ID="IrregularICMode" __shared_blackboard="true"/>
         </Fallback>
     </BehaviorTree>
@@ -46,7 +52,10 @@
                 <Condition ID="AllRed"/>
                 <SubTree ID="ChangeRed" __shared_blackboard="true"/>
             </Fallback>
-            <SubTree ID="FlashOrange" __shared_blackboard="true"/>
+            <ReactiveSequence name="">
+                <SubTree ID="FlashOrange" __shared_blackboard="true"/>
+                <Condition ID="OperatorModeRegular"/>
+            </ReactiveSequence>
             <Fallback>
                 <Inverter>
                     <Condition ID="SensorsEnabled"/>
@@ -137,13 +146,6 @@
         </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
-    <BehaviorTree ID="test">
-        <Sequence>
-            <SubTree ID="SelectAllLanterns" __shared_blackboard="true" name=""/>
-            <Action ID="SetLight" color="red" east="{east_road}" north="{north_road}" south="{south_road}" west="{west_road}"/>
-        </Sequence>
-    </BehaviorTree>
-    <!-- ////////// -->
     <TreeNodesModel>
         <Condition ID="AllRed"/>
         <Condition ID="AllRed2Sec"/>
@@ -166,6 +168,8 @@
         <SubTree ID="IrregularICMode">
             <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
+        <Condition ID="OperatorModeRegular"/>
+        <Action ID="OperatorModeSet"/>
         <SubTree ID="RegularICMode">
             <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
         </SubTree>
@@ -183,18 +187,15 @@
         </SubTree>
         <Condition ID="SensorsEnabled"/>
         <Action ID="SetLight">
-            <input_port default="red" name="color"/>
-            <input_port default="{east_road}" name="east"/>
-            <input_port default="{north_road}" name="north"/>
-            <input_port default="{south_road}" name="south"/>
-            <input_port default="{west_road}" name="west"/>
+            <input_port name="color" type="std::string"/>
+            <input_port name="east" type="std::string"/>
+            <input_port name="north" type="std::string"/>
+            <input_port name="south" type="std::string"/>
+            <input_port name="west" type="std::string"/>
         </Action>
         <Action ID="WaitTime">
-            <input_port default="1000" name="time">Time it needs to wait before returning success</input_port>
+            <input_port name="time" type="long"/>
         </Action>
-        <SubTree ID="test">
-            <input_port default="true" name="__shared_blackboard">If false (default), the Subtree has an isolated blackboard and needs port remapping</input_port>
-        </SubTree>
     </TreeNodesModel>
     <!-- ////////// -->
 </root>

@@ -71,6 +71,7 @@ using std::chrono::system_clock;
 BT::NodeStatus WaitTime::tick()
 {
     int64_t timeToWait = getInput<int64_t>("time").value();
+    
     auto currentTimeMs = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
     if (this->nodeStatus == NodeStatus::FAILURE || this->nodeStatus == NodeStatus::SUCCESS)
     {
